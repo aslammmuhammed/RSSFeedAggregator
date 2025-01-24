@@ -1,13 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq" //
 	"github.com/rs/cors"
 )
 
@@ -28,6 +31,22 @@ func main() {
 		log.Fatal("HOST not found in env")
 	}
 
+	dbUrl, exists := os.LookupEnv("DB_URL")
+	if !exists {
+		log.Fatal("HOST not found in env")
+	}
+
+	//Open a DB connection
+	dbConn, err := sql.Open("postgres", dbUrl)
+	if err != nil {
+		log.Fatal("Error connecting to DB", err)
+	}
+	dbQueries := database.New(dbConn)
+
+	apiCfg := apiCfg{
+		DB: dbQueries,
+	}
+
 	allowedOrigin := "http://" + host + ":" + portString
 	fmt.Printf("Starting server on %v\n", allowedOrigin)
 
@@ -40,6 +59,7 @@ func main() {
 	// Add a route to v1MuxRouter with restricted HTTP methods
 	v1MuxRouter.Handle("/healthz", new(healthHandler)).Methods("GET")
 	v1MuxRouter.Handle("/err", new(errorHandler)).Methods("GET")
+	v1MuxRouter.HandleFunc("/user", apiCfg.userHandler).Methods("POST")
 
 	// CORS
 	// Default CORS

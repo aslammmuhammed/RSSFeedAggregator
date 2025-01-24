@@ -9,6 +9,8 @@ import (
 func respondWithError(w http.ResponseWriter, code int, msg string) {
 	if code > 499 {
 		fmt.Printf("responding with 5xx error : %v\n", msg)
+	} else if code > 399 {
+		fmt.Printf("responding with 4xx error : %v\n", msg)
 	}
 
 	type errResponse struct {

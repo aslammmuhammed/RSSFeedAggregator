@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: rssagg_postgres_db
+    environment:
+      POSTGRES_USER: application
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rssagg
+    ports:
+      - "5432:5432"
+    volumes:
+      - rssagg_postgres_data:/var/lib/postgresql/data
+volumes:
+  rssagg_postgres_data:
