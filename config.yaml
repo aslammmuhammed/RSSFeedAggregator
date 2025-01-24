@@ -1,0 +1,3 @@
+appPort: 3000
+appHost: localhost
+dbUrl: postgresql://application:password@localhost:5432/rssagg?sslmode=disable

@@ -4,39 +4,21 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" //
 	"github.com/rs/cors"
 )
 
 func main() {
 	// Load environment variables
-	err := godotenv.Load(".env")
+	appCfg, err := NewConfig()
 	if err != nil {
-		log.Fatal("Error reading env file: ", err)
+		log.Fatalf("Config error: %v", err)
 	}
-
-	portString, exists := os.LookupEnv("PORT")
-	if !exists {
-		log.Fatal("PORT not found in env")
-	}
-
-	host, exists := os.LookupEnv("HOST")
-	if !exists {
-		log.Fatal("HOST not found in env")
-	}
-
-	dbUrl, exists := os.LookupEnv("DB_URL")
-	if !exists {
-		log.Fatal("HOST not found in env")
-	}
-
 	//Open a DB connection
-	dbConn, err := sql.Open("postgres", dbUrl)
+	dbConn, err := sql.Open("postgres", appCfg.DBUrl)
 	if err != nil {
 		log.Fatal("Error connecting to DB", err)
 	}
@@ -46,7 +28,7 @@ func main() {
 		DB: dbQueries,
 	}
 
-	allowedOrigin := "http://" + host + ":" + portString
+	allowedOrigin := "http://" + appCfg.AppHost + ":" + appCfg.AppPort
 	log.Printf("Starting server on %v\n", allowedOrigin)
 
 	// Main router
@@ -78,7 +60,7 @@ func main() {
 	// CORS Wrapped on muxRouter
 	muxRoutersCORSWrappedHandler := c.Handler(muxRouter)
 	server := &http.Server{
-		Addr:    host + ":" + portString,
+		Addr:    appCfg.AppHost + ":" + appCfg.AppPort,
 		Handler: muxRoutersCORSWrappedHandler, // Use the CORS-wrapped router as the handler
 	}
 
