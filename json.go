@@ -2,15 +2,15 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 )
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {
 	if code > 499 {
-		fmt.Printf("responding with 5xx error : %v\n", msg)
+		log.Printf("responding with 5xx error : %v\n", msg)
 	} else if code > 399 {
-		fmt.Printf("responding with 4xx error : %v\n", msg)
+		log.Printf("responding with 4xx error : %v\n", msg)
 	}
 
 	type errResponse struct {
@@ -25,7 +25,7 @@ func respondWithError(w http.ResponseWriter, code int, msg string) {
 func respondWithJSON(w http.ResponseWriter, code int, payload any) {
 	data, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Printf("error encoding json:%v", err)
+		log.Printf("error encoding json:%v", err)
 		w.WriteHeader(500)
 		return
 	}

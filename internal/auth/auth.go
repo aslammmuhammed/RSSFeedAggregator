@@ -2,7 +2,7 @@ package auth
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -13,7 +13,7 @@ import (
 func GetAPIKey(header http.Header) (string, error) {
 	authHeader := header.Get("Authorization")
 	if authHeader == "" {
-		fmt.Println("empty auth header")
+		log.Println("empty auth header")
 		return "", errors.New("no Authorization header provided")
 	}
 	authHeaderValues := strings.Split(authHeader, " ")

@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -48,10 +47,11 @@ func main() {
 	}
 
 	allowedOrigin := "http://" + host + ":" + portString
-	fmt.Printf("Starting server on %v\n", allowedOrigin)
+	log.Printf("Starting server on %v\n", allowedOrigin)
 
 	// Main router
 	muxRouter := mux.NewRouter()
+	muxRouter.Use(LoggingMiddleware)
 
 	// Subrouter for v1 endpoints
 	v1MuxRouter := muxRouter.PathPrefix("/v1").Subrouter()
@@ -75,10 +75,11 @@ func main() {
 		Debug: true,
 	})
 
-	v1MuxRouterCORS := c.Handler(v1MuxRouter)
+	// CORS Wrapped on muxRouter
+	muxRoutersCORSWrappedHandler := c.Handler(muxRouter)
 	server := &http.Server{
 		Addr:    host + ":" + portString,
-		Handler: v1MuxRouterCORS, // Use the CORS-wrapped router as the handler
+		Handler: muxRoutersCORSWrappedHandler, // Use the CORS-wrapped router as the handler
 	}
 
 	log.Fatal(server.ListenAndServe()) // ListenAndServe will block

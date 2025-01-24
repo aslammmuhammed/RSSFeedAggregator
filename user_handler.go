@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -16,7 +16,7 @@ func (a *apiCfg) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	inputParams := createUserParams{}
 	err := decoder.Decode(&inputParams)
 	if err != nil {
-		fmt.Printf("Error decoding create user inputParams: %v", err)
+		log.Printf("Error decoding create user inputParams: %v", err)
 		respondWithError(w, http.StatusUnprocessableEntity, "couldn't decode input parameters")
 		return
 	}
@@ -28,28 +28,28 @@ func (a *apiCfg) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: time.Now().UTC(),
 	})
 	if err != nil {
-		fmt.Printf("Error executing create user query: %v", err)
+		log.Printf("Error executing create user query: %v", err)
 		respondWithError(w, http.StatusInternalServerError, "couldnot create user")
 		return
 	}
 
-	fmt.Printf("user %v created\n", user.Name)
+	log.Printf("user %v created\n", user.Name)
 	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
 
 func (a *apiCfg) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	apiKey, err := auth.GetAPIKey(r.Header)
 	if err != nil {
-		fmt.Printf("couldn't find api key: %v", err)
+		log.Printf("couldn't find api key: %v", err)
 		respondWithError(w, http.StatusUnauthorized, "Couldn't find api key")
 		return
 	}
 	user, err := a.DB.GetUserByApiKey(r.Context(), apiKey)
 	if err != nil {
-		fmt.Printf("no user found with api key: %v\n", err)
+		log.Printf("no user found with api key: %v\n", err)
 		respondWithError(w, http.StatusNotFound, "Couldn't get user")
 		return
 	}
-	fmt.Printf("user with API key found :%v", user)
+	log.Printf("user with API key found :%v", user)
 	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
