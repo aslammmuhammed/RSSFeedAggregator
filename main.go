@@ -59,11 +59,10 @@ func main() {
 	// Add a route to v1MuxRouter with restricted HTTP methods
 	v1MuxRouter.Handle("/healthz", new(healthHandler)).Methods("GET")
 	v1MuxRouter.Handle("/err", new(errorHandler)).Methods("GET")
-	v1MuxRouter.HandleFunc("/user", apiCfg.userHandler).Methods("POST")
+	v1MuxRouter.HandleFunc("/user", apiCfg.createUserHandler).Methods("POST")
+	v1MuxRouter.HandleFunc("/user", apiCfg.getUserHandler).Methods("GET")
 
 	// CORS
-	// Default CORS
-	// v1MuxRouterCORS := cors.Default().Handler(v1MuxRouter)
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
@@ -73,7 +72,7 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 		// Enable Debugging for testing, consider disabling in production
-		// Debug: true,
+		Debug: true,
 	})
 
 	v1MuxRouterCORS := c.Handler(v1MuxRouter)

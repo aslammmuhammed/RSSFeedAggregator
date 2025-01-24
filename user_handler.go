@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/auth"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/google/uuid"
 )
 
-func (a *apiCfg) userHandler(w http.ResponseWriter, r *http.Request) {
+func (a *apiCfg) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	inputParams := createUserParams{}
 	err := decoder.Decode(&inputParams)
@@ -33,5 +34,22 @@ func (a *apiCfg) userHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("user %v created\n", user.Name)
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
+}
+
+func (a *apiCfg) getUserHandler(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		fmt.Printf("couldn't find api key: %v", err)
+		respondWithError(w, http.StatusUnauthorized, "Couldn't find api key")
+		return
+	}
+	user, err := a.DB.GetUserByApiKey(r.Context(), apiKey)
+	if err != nil {
+		fmt.Printf("no user found with api key: %v\n", err)
+		respondWithError(w, http.StatusNotFound, "Couldn't get user")
+		return
+	}
+	fmt.Printf("user with API key found :%v", user)
 	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
