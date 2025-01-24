@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: RSSFeedAggregator
+  description: "RSS feed aggregator"
+  version: 1.0.0
+  contact:
+    name: Muhammed Aslam
+    url: https://github.com/aslammmuhammed
+servers:
+  - url: http://localhost:3000
+paths:
+  /v1/healthz:
+    get:
+      summary: Health
+      description: Health
+      operationId: health
+      responses:
+        "200":
+          description: "health endpoint"
+  /v1/err:
+    get:
+      summary: Get Error
+      description: Get Error
+      operationId: getError
+      responses:
+        "500":
+          description: "sample error endpoint"
+  /v1/user:
+    get:
+      summary: Get User By API Key
+      description: Get User By API Key
+      operationId: getUserByApiKey
+      responses:
+        "200":
+          description: "Get User By API Key"
+      parameters:
+        - in: header
+          name: Authorization
+          description: API Key for Authorization
+          required: true
+          schema:
+            type: string
+            example: "APIKey 47a89cffb6197eb829a0744307fbbbd60acbd06b0379c5199e1c33f71c5373b6"
+    post:
+      summary: Create User
+      description: Create User
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: raju bhai
+            examples:
+              Create User:
+                value:
+                  name: raju bhai
+      responses:
+        "200":
+          description: ""
+tags: []
