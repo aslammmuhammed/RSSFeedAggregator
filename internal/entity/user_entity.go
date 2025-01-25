@@ -1,4 +1,4 @@
-package main
+package entity
 
 import (
 	"time"
@@ -15,10 +15,10 @@ type User struct {
 	ApiKey    string    `json:"api_key"`
 }
 
-type apiCfg struct {
+type ApiCfg struct {
 	DB *database.Queries
 }
 
-type createUserParams struct {
+type CreateUserParams struct {
 	Name string
 }

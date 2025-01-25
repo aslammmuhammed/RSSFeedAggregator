@@ -1,22 +1,21 @@
-package main
+package app
 
 import (
 	"database/sql"
 	"log"
 	"net/http"
 
+	"github.com/aslammmuhammed/RSSFeedAggregator/config"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" //
 	"github.com/rs/cors"
 )
 
-func main() {
-	// Load environment variables
-	appCfg, err := NewConfig()
-	if err != nil {
-		log.Fatalf("Config error: %v", err)
-	}
+func Run(appCfg *config.Config) {
 	//Open a DB connection
 	dbConn, err := sql.Open("postgres", appCfg.DBUrl)
 	if err != nil {
@@ -24,7 +23,7 @@ func main() {
 	}
 	dbQueries := database.New(dbConn)
 
-	apiCfg := apiCfg{
+	apiCfg := entity.ApiCfg{
 		DB: dbQueries,
 	}
 
@@ -33,16 +32,20 @@ func main() {
 
 	// Main router
 	muxRouter := mux.NewRouter()
-	muxRouter.Use(LoggingMiddleware)
+	muxRouter.Use(middleware.LoggingMiddleware)
 
 	// Subrouter for v1 endpoints
 	v1MuxRouter := muxRouter.PathPrefix("/v1").Subrouter()
 
 	// Add a route to v1MuxRouter with restricted HTTP methods
-	v1MuxRouter.Handle("/healthz", new(healthHandler)).Methods("GET")
-	v1MuxRouter.Handle("/err", new(errorHandler)).Methods("GET")
-	v1MuxRouter.HandleFunc("/user", apiCfg.createUserHandler).Methods("POST")
-	v1MuxRouter.HandleFunc("/user", apiCfg.getUserHandler).Methods("GET")
+	v1MuxRouter.Handle("/healthz", new(handler.HealthHandler)).Methods("GET")
+	v1MuxRouter.Handle("/err", new(handler.ErrorHandler)).Methods("GET")
+	// uh := new(handler.UserHandler)
+	uh := handler.UserHandler{
+		ApiCfg: &apiCfg,
+	}
+	v1MuxRouter.HandleFunc("/user", uh.CreateUserHandler).Methods("POST")
+	v1MuxRouter.HandleFunc("/user", uh.GetUserHandler).Methods("GET")
 
 	// CORS
 	c := cors.New(cors.Options{

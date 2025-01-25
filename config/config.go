@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type Config struct {
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
 	//loads from config file
-	err := cleanenv.ReadConfig("config.yaml", cfg)
+	err := cleanenv.ReadConfig("config/config.yaml", cfg)
 	if err != nil {
 		log.Printf("error Reading config file: %v", err)
 		return nil, fmt.Errorf("config error: %w", err)
