@@ -41,3 +41,14 @@ func (f *FeedHandler) CreateFeedHandler(w http.ResponseWriter, r *http.Request, 
 	log.Printf("created feed with Name: %v,Url:%v", feed.Name, feed.Url)
 	utilities.RespondWithJSON(w, http.StatusOK, utilities.DatabaseFeedToFeed(feed))
 }
+
+func (f *FeedHandler) GetFeedsHandler(w http.ResponseWriter, r *http.Request) {
+	feeds, err := f.ApiCfg.DB.GetFeeds(r.Context())
+	if err != nil {
+		log.Printf("error executing getfeeds query: %v", err)
+		utilities.RespondWithError(w, http.StatusInternalServerError, "couldn't get feeds")
+		return
+	}
+	log.Printf("got %d feeds\n", len(feeds))
+	utilities.RespondWithJSON(w, http.StatusOK, utilities.DatabaseFeedsToFeeds(feeds))
+}

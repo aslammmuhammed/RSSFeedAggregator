@@ -54,8 +54,9 @@ func Run(appCfg *config.Config) {
 	fh := feeds.FeedHandler{
 		ApiCfg: &apiCfg,
 	}
-	v1MuxRouter.HandleFunc("/feeds", middleware.UserAuthMiddleware(&uh, fh.CreateFeedHandler))
-	
+	v1MuxRouter.HandleFunc("/feeds", middleware.UserAuthMiddleware(&uh, fh.CreateFeedHandler)).Methods("POST")
+	v1MuxRouter.HandleFunc("/feeds", fh.GetFeedsHandler).Methods("GET")
+
 	// CORS
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},

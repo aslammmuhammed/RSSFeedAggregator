@@ -15,3 +15,11 @@ func DatabaseFeedToFeed(feed database.Feed) entity.Feed {
 		UserID:    feed.UserID,
 	}
 }
+
+func DatabaseFeedsToFeeds(feeds []database.Feed) []entity.Feed {
+	feedsResponse := make([]entity.Feed, len(feeds))
+	for i, feed := range feeds {
+		feedsResponse[i] = DatabaseFeedToFeed(feed)
+	}
+	return feedsResponse
+}
