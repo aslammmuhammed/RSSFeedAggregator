@@ -8,7 +8,9 @@ import (
 	"github.com/aslammmuhammed/RSSFeedAggregator/config"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_error"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_health"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_user"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" //
@@ -38,14 +40,14 @@ func Run(appCfg *config.Config) {
 	v1MuxRouter := muxRouter.PathPrefix("/v1").Subrouter()
 
 	// Add a route to v1MuxRouter with restricted HTTP methods
-	v1MuxRouter.Handle("/healthz", new(handler.HealthHandler)).Methods("GET")
-	v1MuxRouter.Handle("/err", new(handler.ErrorHandler)).Methods("GET")
+	v1MuxRouter.Handle("/healthz", new(app_health.HealthHandler)).Methods("GET")
+	v1MuxRouter.Handle("/err", new(app_error.ErrorHandler)).Methods("GET")
 	// uh := new(handler.UserHandler)
-	uh := handler.UserHandler{
+	uh := app_user.UserHandler{
 		ApiCfg: &apiCfg,
 	}
 	v1MuxRouter.HandleFunc("/user", uh.CreateUserHandler).Methods("POST")
-	v1MuxRouter.HandleFunc("/user", uh.GetUserHandler).Methods("GET")
+	v1MuxRouter.HandleFunc("/user", middleware.UserAuthMiddleware(&uh, uh.GetUserHandler)).Methods("GET")
 
 	// CORS
 	c := cors.New(cors.Options{

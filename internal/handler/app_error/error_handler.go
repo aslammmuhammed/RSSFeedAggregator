@@ -1,4 +1,4 @@
-package handler
+package app_error
 
 import (
 	"net/http"

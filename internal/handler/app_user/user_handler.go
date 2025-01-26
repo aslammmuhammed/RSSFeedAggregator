@@ -1,4 +1,4 @@
-package handler
+package app_user
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/auth"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/utilities"
@@ -43,19 +42,6 @@ func (u *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 	utilities.RespondWithJSON(w, http.StatusOK, utilities.DatabaseUserToUser(user))
 }
 
-func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	apiKey, err := auth.GetAPIKey(r.Header)
-	if err != nil {
-		log.Printf("couldn't find api key: %v", err)
-		utilities.RespondWithError(w, http.StatusUnauthorized, "Couldn't find api key")
-		return
-	}
-	user, err := u.ApiCfg.DB.GetUserByApiKey(r.Context(), apiKey)
-	if err != nil {
-		log.Printf("no user found with api key: %v\n", err)
-		utilities.RespondWithError(w, http.StatusNotFound, "Couldn't get user")
-		return
-	}
-	log.Printf("user with API key found id: %v name: %v", user.ID, user.Name)
+func (u *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request, user database.User) {
 	utilities.RespondWithJSON(w, http.StatusOK, utilities.DatabaseUserToUser(user))
 }

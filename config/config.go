@@ -8,9 +8,9 @@ import (
 )
 
 type Config struct {
-	AppPort string `yaml:"appPort" env:"APP_PORT" env-default:"3000"`
-	AppHost string `yaml:"appHost" env:"APP_HOST" env-default:"localhost"`
-	DBUrl   string `yaml:"dbUrl" env:"DB_URL" env-default:"postgres"`
+	AppPort string `env-required:"true" yaml:"appPort" env:"APP_PORT" env-default:"3000"`
+	AppHost string `env-required:"true" yaml:"appHost" env:"APP_HOST" env-default:"localhost"`
+	DBUrl   string `env-required:"true" yaml:"dbUrl" env:"DB_URL" env-default:"postgres"`
 }
 
 // NewConfig returns app config

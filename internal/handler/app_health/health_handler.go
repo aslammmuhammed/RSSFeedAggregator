@@ -1,4 +1,4 @@
-package handler
+package app_health
 
 import (
 	"net/http"
