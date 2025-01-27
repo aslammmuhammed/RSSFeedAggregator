@@ -15,5 +15,5 @@ type User struct {
 }
 
 type CreateUserParams struct {
-	Name string
+	Name string `json:"name"`
 }

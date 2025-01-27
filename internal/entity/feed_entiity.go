@@ -7,8 +7,8 @@ import (
 )
 
 type CreateFeedParams struct {
-	Name string
-	Url  string
+	Name string `json:"name"` 
+	Url  string `json:"url"`
 }
 
 type Feed struct {
