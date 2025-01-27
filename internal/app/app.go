@@ -57,6 +57,11 @@ func Run(appCfg *config.Config) {
 	v1MuxRouter.HandleFunc("/feeds", middleware.UserAuthMiddleware(&uh, fh.CreateFeedHandler)).Methods("POST")
 	v1MuxRouter.HandleFunc("/feeds", fh.GetFeedsHandler).Methods("GET")
 
+	//feed follows
+	v1MuxRouter.HandleFunc("/feed_follows", middleware.UserAuthMiddleware(&uh, fh.CreateFeedFollowHandler)).Methods("POST")
+	v1MuxRouter.HandleFunc("/feed_follows", middleware.UserAuthMiddleware(&uh, fh.GetFeedFollowsForUserHandler)).Methods("GET")
+	v1MuxRouter.HandleFunc("/feed_follows/{id}", middleware.UserAuthMiddleware(&uh, fh.DeleteFeedFollowForUserHandler)).Methods("DELETE")
+
 	// CORS
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},
