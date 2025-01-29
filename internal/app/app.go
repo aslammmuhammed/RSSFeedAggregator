@@ -8,13 +8,11 @@ import (
 	"github.com/aslammmuhammed/RSSFeedAggregator/config"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_error"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_health"
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_user"
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/feeds"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/router"
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq" //
+	_ "github.com/lib/pq" //postgres driver for database/sql package
 	"github.com/rs/cors"
 )
 
@@ -42,25 +40,9 @@ func Run(appCfg *config.Config) {
 
 	// Add a route to v1MuxRouter with restricted HTTP methods
 	v1MuxRouter.Handle("/healthz", new(app_health.HealthHandler)).Methods("GET")
-	v1MuxRouter.Handle("/err", new(app_error.ErrorHandler)).Methods("GET")
-	// uh := new(handler.UserHandler)
-	uh := app_user.UserHandler{
-		ApiCfg: &apiCfg,
-	}
-	v1MuxRouter.HandleFunc("/user", uh.CreateUserHandler).Methods("POST")
-	v1MuxRouter.HandleFunc("/user", middleware.UserAuthMiddleware(&uh, uh.GetUserHandler)).Methods("GET")
-
-	//feeds
-	fh := feeds.FeedHandler{
-		ApiCfg: &apiCfg,
-	}
-	v1MuxRouter.HandleFunc("/feeds", middleware.UserAuthMiddleware(&uh, fh.CreateFeedHandler)).Methods("POST")
-	v1MuxRouter.HandleFunc("/feeds", fh.GetFeedsHandler).Methods("GET")
-
-	//feed follows
-	v1MuxRouter.HandleFunc("/feed_follows", middleware.UserAuthMiddleware(&uh, fh.CreateFeedFollowHandler)).Methods("POST")
-	v1MuxRouter.HandleFunc("/feed_follows", middleware.UserAuthMiddleware(&uh, fh.GetFeedFollowsForUserHandler)).Methods("GET")
-	v1MuxRouter.HandleFunc("/feed_follows/{id}", middleware.UserAuthMiddleware(&uh, fh.DeleteFeedFollowForUserHandler)).Methods("DELETE")
+	uh := router.UserRoutes(v1MuxRouter, &apiCfg)
+	fh := router.FeedRoutes(v1MuxRouter, &apiCfg, *uh)
+	router.FeedFollowRoutes(v1MuxRouter, uh, fh)
 
 	// CORS
 	c := cors.New(cors.Options{
