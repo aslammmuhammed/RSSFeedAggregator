@@ -2,11 +2,19 @@ package router
 
 import (
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_health"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_user"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/feeds"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
 	"github.com/gorilla/mux"
 )
+
+func HealthRoute(router *mux.Router, apiCfg *entity.ApiCfg) {
+	hh := app_health.HealthHandler{
+		ApiCfg: apiCfg,
+	}
+	router.Handle("/healthz", hh).Methods("GET")
+}
 
 func UserRoutes(router *mux.Router, apiCfg *entity.ApiCfg) *app_user.UserHandler {
 	uh := app_user.UserHandler{

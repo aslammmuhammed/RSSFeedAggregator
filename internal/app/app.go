@@ -8,7 +8,6 @@ import (
 	"github.com/aslammmuhammed/RSSFeedAggregator/config"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_health"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/router"
 	"github.com/gorilla/mux"
@@ -39,7 +38,7 @@ func Run(appCfg *config.Config) {
 	v1MuxRouter := muxRouter.PathPrefix("/v1").Subrouter()
 
 	// Add a route to v1MuxRouter with restricted HTTP methods
-	v1MuxRouter.Handle("/healthz", new(app_health.HealthHandler)).Methods("GET")
+	router.HealthRoute(v1MuxRouter, &apiCfg)
 	uh := router.UserRoutes(v1MuxRouter, &apiCfg)
 	fh := router.FeedRoutes(v1MuxRouter, &apiCfg, *uh)
 	router.FeedFollowRoutes(v1MuxRouter, uh, fh)
