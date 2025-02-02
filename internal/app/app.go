@@ -1,13 +1,10 @@
 package app
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
 	"github.com/aslammmuhammed/RSSFeedAggregator/config"
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
-	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/router"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/rss"
@@ -17,22 +14,10 @@ import (
 )
 
 func Run(appCfg *config.Config) {
-	//Open a DB connection
-	dbConn, err := sql.Open("postgres", appCfg.DBUrl)
-	if err != nil {
-		log.Fatal("Error connecting to DB", err)
-	}
-	dbQueries := database.New(dbConn)
 
-	apiCfg := entity.ApiCfg{
-		DB:                dbQueries,
-		QueryLimit:        appCfg.DefaultQueryLimit,
-		ScrapeInterval:    appCfg.ScrapeInterval,
-		ScrapeConcurrency: appCfg.ScrapeConcurrency,
-		ScrapeTimeout:     appCfg.ScrapeTimeout,
-	}
+	apiCfg := initAPIConfig(appCfg)
 
-	go rss.StartScraping(&apiCfg)
+	go rss.StartScraping(apiCfg)
 
 	allowedOrigin := "http://" + appCfg.AppHost + ":" + appCfg.AppPort
 	log.Printf("Starting server on %v\n", allowedOrigin)
@@ -45,11 +30,11 @@ func Run(appCfg *config.Config) {
 	v1MuxRouter := muxRouter.PathPrefix("/v1").Subrouter()
 
 	// Add a route to v1MuxRouter with restricted HTTP methods
-	router.HealthRoute(v1MuxRouter, &apiCfg)
-	uh := router.UserRoutes(v1MuxRouter, &apiCfg)
-	fh := router.FeedRoutes(v1MuxRouter, &apiCfg, *uh)
+	router.HealthRoute(v1MuxRouter, apiCfg)
+	uh := router.UserRoutes(v1MuxRouter, apiCfg)
+	fh := router.FeedRoutes(v1MuxRouter, apiCfg, *uh)
 	router.FeedFollowRoutes(v1MuxRouter, uh, fh)
-	router.PostRoutes(v1MuxRouter, &apiCfg, uh)
+	router.PostRoutes(v1MuxRouter, apiCfg, uh)
 	// CORS
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},
