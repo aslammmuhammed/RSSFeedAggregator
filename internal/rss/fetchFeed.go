@@ -6,29 +6,14 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
 )
 
-type RSSFeed struct {
-	Channel struct {
-		Title       string    `xml:"title"`
-		Link        string    `xml:"link"`
-		Description string    `xml:"description"`
-		Language    string    `xml:"language"`
-		Item        []RSSItem `xml:"item"`
-	} `xml:"channel"`
-}
-
-type RSSItem struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	PubDate     string `xml:"pubDate"`
-}
-
-func fetchFeed(feedUrl string) (*RSSFeed, error) {
+func fetchFeed(feedUrl string, timeOut int) (*entity.RSSFeed, error) {
 
 	httpClient := http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: time.Duration(timeOut) * time.Second,
 	}
 
 	resp, err := httpClient.Get(feedUrl)
@@ -44,7 +29,7 @@ func fetchFeed(feedUrl string) (*RSSFeed, error) {
 		return nil, err
 	}
 
-	rssFeed := RSSFeed{}
+	rssFeed := entity.RSSFeed{}
 	err = xml.Unmarshal(respBytes, &rssFeed)
 	if err != nil {
 		log.Printf("error Unmarshalling feed respBytes : %v", err)

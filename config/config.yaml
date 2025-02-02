@@ -1,3 +1,7 @@
 appPort: 3000
 appHost: localhost
 dbUrl: postgresql://application:password@localhost:5432/rssagg?sslmode=disable
+defaultQueryLimit: 10
+scrapeInterval: 10
+scrapeConcurrency: 10
+scrapeTimeout: 10

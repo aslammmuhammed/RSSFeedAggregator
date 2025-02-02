@@ -16,7 +16,9 @@ VALUES
 SELECT 
   * 
 FROM 
-  feeds;
+  feeds
+LIMIT
+  $1;
 
 -- name: GetNextFeedsToFetch :many
 SELECT 

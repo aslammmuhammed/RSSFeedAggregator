@@ -13,8 +13,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func StartScraping(apiCfg *entity.ApiCfg, concurrency int, timeBetweenRequest time.Duration) {
-	log.Printf("Staring to fetch feeds every %v seconds in %d go routines", timeBetweenRequest, concurrency)
+func StartScraping(apiCfg *entity.ApiCfg) {
+	log.Printf("Staring to fetch feeds every %v seconds in %d go routines", apiCfg.ScrapeInterval, apiCfg.ScrapeConcurrency)
+	concurrency := apiCfg.ScrapeConcurrency
+	timeBetweenRequest := time.Duration(time.Second * time.Duration(apiCfg.ScrapeInterval))
 	ticker := time.NewTicker(timeBetweenRequest)
 
 	// infinte loop executed on every 'timeBetweenRequest'
@@ -44,7 +46,7 @@ func scrapeFeed(apiCfg *entity.ApiCfg, wg *sync.WaitGroup, feedToFetch database.
 		return
 	}
 
-	rssFeed, err := fetchFeed(feedToFetch.Url)
+	rssFeed, err := fetchFeed(feedToFetch.Url, apiCfg.ScrapeTimeout)
 	if err != nil {
 		log.Printf("couldn't fetch feed %s error: %v", feedToFetch.Name, err)
 		return

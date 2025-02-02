@@ -63,10 +63,12 @@ SELECT
   id, created_at, updated_at, name, url, user_id, last_fetched_at 
 FROM 
   feeds
+LIMIT
+  $1
 `
 
-func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
-	rows, err := q.db.QueryContext(ctx, getFeeds)
+func (q *Queries) GetFeeds(ctx context.Context, limit int32) ([]Feed, error) {
+	rows, err := q.db.QueryContext(ctx, getFeeds, limit)
 	if err != nil {
 		return nil, err
 	}

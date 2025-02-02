@@ -17,11 +17,11 @@ type PostHandler struct {
 func (p *PostHandler) GetNewPostsForUser(w http.ResponseWriter, r *http.Request, user database.User) {
 
 	limitStr := r.URL.Query().Get("limit")
-	limit := 10
+	limit := p.ApiCfg.QueryLimit
 	if specifedLimit, err := strconv.Atoi(limitStr); err == nil {
 		limit = specifedLimit
 	}
-	
+
 	posts, err := p.ApiCfg.DB.GetPostsForUser(r.Context(), database.GetPostsForUserParams{
 		UserID: user.ID,
 		Limit:  int32(limit),

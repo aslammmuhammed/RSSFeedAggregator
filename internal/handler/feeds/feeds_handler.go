@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
@@ -43,7 +44,14 @@ func (f *FeedHandler) CreateFeedHandler(w http.ResponseWriter, r *http.Request, 
 }
 
 func (f *FeedHandler) GetFeedsHandler(w http.ResponseWriter, r *http.Request) {
-	feeds, err := f.ApiCfg.DB.GetFeeds(r.Context())
+
+	limitStr := r.URL.Query().Get("limit")
+	limit := f.ApiCfg.QueryLimit
+	if specifedLimit, err := strconv.Atoi(limitStr); err == nil {
+		limit = specifedLimit
+	}
+
+	feeds, err := f.ApiCfg.DB.GetFeeds(r.Context(), int32(limit))
 	if err != nil {
 		log.Printf("error executing getfeeds query: %v", err)
 		utilities.RespondWithError(w, http.StatusInternalServerError, "couldn't get feeds")

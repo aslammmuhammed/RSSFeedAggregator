@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/aslammmuhammed/RSSFeedAggregator/config"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
@@ -26,10 +25,14 @@ func Run(appCfg *config.Config) {
 	dbQueries := database.New(dbConn)
 
 	apiCfg := entity.ApiCfg{
-		DB: dbQueries,
+		DB:                dbQueries,
+		QueryLimit:        appCfg.DefaultQueryLimit,
+		ScrapeInterval:    appCfg.ScrapeInterval,
+		ScrapeConcurrency: appCfg.ScrapeConcurrency,
+		ScrapeTimeout:     appCfg.ScrapeTimeout,
 	}
 
-	go rss.StartScraping(&apiCfg, 10, 10*time.Second)
+	go rss.StartScraping(&apiCfg)
 
 	allowedOrigin := "http://" + appCfg.AppHost + ":" + appCfg.AppPort
 	log.Printf("Starting server on %v\n", allowedOrigin)
