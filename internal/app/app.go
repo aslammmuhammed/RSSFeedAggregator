@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/aslammmuhammed/RSSFeedAggregator/config"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/database"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/entity"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/router"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/rss"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" //postgres driver for database/sql package
 	"github.com/rs/cors"
@@ -27,6 +29,8 @@ func Run(appCfg *config.Config) {
 		DB: dbQueries,
 	}
 
+	go rss.StartScraping(&apiCfg, 10, 10*time.Second)
+
 	allowedOrigin := "http://" + appCfg.AppHost + ":" + appCfg.AppPort
 	log.Printf("Starting server on %v\n", allowedOrigin)
 
@@ -42,7 +46,7 @@ func Run(appCfg *config.Config) {
 	uh := router.UserRoutes(v1MuxRouter, &apiCfg)
 	fh := router.FeedRoutes(v1MuxRouter, &apiCfg, *uh)
 	router.FeedFollowRoutes(v1MuxRouter, uh, fh)
-
+	router.PostRoutes(v1MuxRouter, &apiCfg, uh)
 	// CORS
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOrigin},

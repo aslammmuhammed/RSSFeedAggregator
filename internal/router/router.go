@@ -5,6 +5,7 @@ import (
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_health"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/app_user"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/feeds"
+	"github.com/aslammmuhammed/RSSFeedAggregator/internal/handler/posts"
 	"github.com/aslammmuhammed/RSSFeedAggregator/internal/middleware"
 	"github.com/gorilla/mux"
 )
@@ -39,4 +40,11 @@ func FeedFollowRoutes(router *mux.Router, uh *app_user.UserHandler, fh *feeds.Fe
 	router.HandleFunc("/feed_follows", middleware.UserAuthMiddleware(uh, fh.CreateFeedFollowHandler)).Methods("POST")
 	router.HandleFunc("/feed_follows", middleware.UserAuthMiddleware(uh, fh.GetFeedFollowsForUserHandler)).Methods("GET")
 	router.HandleFunc("/feed_follows/{id}", middleware.UserAuthMiddleware(uh, fh.DeleteFeedFollowForUserHandler)).Methods("DELETE")
+}
+
+func PostRoutes(router *mux.Router, apiCfg *entity.ApiCfg, uh *app_user.UserHandler) {
+	ph := posts.PostHandler{
+		ApiCfg: apiCfg,
+	}
+	router.HandleFunc("/posts", middleware.UserAuthMiddleware(uh, ph.GetNewPostsForUser)).Methods("GET")
 }
