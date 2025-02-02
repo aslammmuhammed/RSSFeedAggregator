@@ -20,5 +20,21 @@ func (h HealthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		utilities.RespondWithError(w, http.StatusInternalServerError, "couldn't connect to database")
 		return
 	}
-	utilities.RespondWithJSON(w, http.StatusOK, map[string]interface{}{"status": "ok"})
+	utilities.RespondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"status": "UP",
+		"details": map[string]interface{}{
+			"database": map[string]interface{}{
+				"status": "UP",
+				"details": map[string]interface{}{
+					"connection": "SUCCESS",
+				},
+			},
+			"api": map[string]interface{}{
+				"status": "UP",
+			},
+			"rssFeedCollector": map[string]interface{}{
+				"status": "UP",
+			},
+		},
+	})
 }
